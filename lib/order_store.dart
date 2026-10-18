@@ -25,36 +25,38 @@ class SqliteOrderStore implements OrderStore {
         p.join(await _factory.getDatabasesPath(), 'mizzy_bistro_pos.db');
     _database = await _factory.openDatabase(
       path,
-      version: 1,
-      onConfigure: (db) async {
-        await db.execute('PRAGMA foreign_keys = ON');
-      },
-      onCreate: (db, version) async {
-        await db.execute('''
-          CREATE TABLE orders (
-            number INTEGER PRIMARY KEY,
-            service TEXT NOT NULL,
-            total REAL NOT NULL CHECK (total >= 0),
-            status TEXT NOT NULL,
-            created_at TEXT NOT NULL
-          )
-        ''');
-        await db.execute('''
-          CREATE TABLE order_lines (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            order_number INTEGER NOT NULL,
-            product_id TEXT NOT NULL,
-            product_name TEXT NOT NULL,
-            category TEXT NOT NULL,
-            unit_price REAL NOT NULL CHECK (unit_price >= 0),
-            quantity INTEGER NOT NULL CHECK (quantity > 0),
-            FOREIGN KEY (order_number) REFERENCES orders(number) ON DELETE CASCADE
-          )
-        ''');
-        await db.execute(
-          'CREATE INDEX idx_order_lines_order_number ON order_lines(order_number)',
-        );
-      },
+      options: OpenDatabaseOptions(
+        version: 1,
+        onConfigure: (db) async {
+          await db.execute('PRAGMA foreign_keys = ON');
+        },
+        onCreate: (db, version) async {
+          await db.execute('''
+            CREATE TABLE orders (
+              number INTEGER PRIMARY KEY,
+              service TEXT NOT NULL,
+              total REAL NOT NULL CHECK (total >= 0),
+              status TEXT NOT NULL,
+              created_at TEXT NOT NULL
+            )
+          ''');
+          await db.execute('''
+            CREATE TABLE order_lines (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              order_number INTEGER NOT NULL,
+              product_id TEXT NOT NULL,
+              product_name TEXT NOT NULL,
+              category TEXT NOT NULL,
+              unit_price REAL NOT NULL CHECK (unit_price >= 0),
+              quantity INTEGER NOT NULL CHECK (quantity > 0),
+              FOREIGN KEY (order_number) REFERENCES orders(number) ON DELETE CASCADE
+            )
+          ''');
+          await db.execute(
+            'CREATE INDEX idx_order_lines_order_number ON order_lines(order_number)',
+          );
+        },
+      ),
     );
     return _database!;
   }
