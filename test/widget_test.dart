@@ -35,7 +35,7 @@ void main() {
     expect(find.text('Order #1001'), findsOneWidget);
     await tester.tap(find.text('Mark ready'));
     await tester.pumpAndSettle();
-    expect(find.text('Ready'), findsOneWidget);
+    expect(find.text('Ready'), findsNWidgets(2));
 
     // Recreate the app around the same store to exercise load-at-startup behavior.
     await tester.pumpWidget(const SizedBox.shrink());
