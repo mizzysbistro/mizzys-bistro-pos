@@ -12,13 +12,19 @@ abstract interface class OrderStore {
 
 /// Device-local SQLite storage. Saving an order and all its lines is one transaction.
 class SqliteOrderStore implements OrderStore {
+  SqliteOrderStore({DatabaseFactory? factory, this.databasePath})
+      : _factory = factory ?? databaseFactory;
+
+  final DatabaseFactory _factory;
+  final String? databasePath;
   Database? _database;
 
   Future<Database> get _db async {
     if (_database != null) return _database!;
-    final root = await getDatabasesPath();
-    _database = await openDatabase(
-      p.join(root, 'mizzy_bistro_pos.db'),
+    final path = databasePath ??
+        p.join(await _factory.getDatabasesPath(), 'mizzy_bistro_pos.db');
+    _database = await _factory.openDatabase(
+      path,
       version: 1,
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
@@ -51,6 +57,14 @@ class SqliteOrderStore implements OrderStore {
       },
     );
     return _database!;
+  }
+
+  /// Closes this connection. The on-device app normally leaves the connection
+  /// open for the lifetime of the process; tests close it to verify reopening.
+  Future<void> close() async {
+    final db = _database;
+    _database = null;
+    await db?.close();
   }
 
   @override
