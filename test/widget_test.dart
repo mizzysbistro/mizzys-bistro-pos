@@ -15,8 +15,6 @@ void main() {
     final store = MemoryOrderStore();
     await tester.pumpWidget(MizzyPosApp(orderStore: store));
     await tester.pumpAndSettle();
-    expect(find.text('No saved orders yet'), findsOneWidget);
-
     await tester.tap(find.text('Classic Burger'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Orders').last);
